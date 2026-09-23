@@ -54,6 +54,4 @@ while True:
 events.sort(key=lambda e: e["d"])
 with open("events.json", "w", encoding="utf-8") as f:
     json.dump(events, f, ensure_ascii=False, indent=2)
-print(f"Готово: записано {len(events)} событий")with open("events.json", "w", encoding="utf-8") as f:
-    json.dump(events, f, ensure_ascii=False, indent=2)
-print(f"wrote {len(events)} events")
+print(f"Готово: записано {len(events)} событий")
