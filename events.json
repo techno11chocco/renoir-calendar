@@ -1,32 +1,56 @@
 [
   {
     "d": "2025-02-10",
+    "e": null,
     "t": "Blog post",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   },
   {
     "d": "2025-02-19",
+    "e": null,
     "t": "Opinion piece",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   },
   {
     "d": "2025-03-11",
+    "e": null,
     "t": "Product launch",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   },
   {
     "d": "2026-09-07",
+    "e": null,
     "t": "цгрв",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   },
   {
     "d": "2026-09-17",
+    "e": null,
     "t": "выступление",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   },
   {
     "d": "2026-09-22",
+    "e": null,
     "t": "тренинг",
-    "c": "coffee"
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
   }
 ]
