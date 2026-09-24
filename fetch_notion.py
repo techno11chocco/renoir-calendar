@@ -10,7 +10,18 @@ H = {"Authorization": f"Bearer {TOKEN}",
      "Notion-Version": "2026-03-11",
      "Content-Type": "application/json"}
 
+# Категория (цвет в календаре): значение из Notion -> ключ
 CAT = {"Сенсори": "sensory", "Кастинг": "kasting", "Обжарка": "roast", "Кофе": "coffee"}
+
+# Формат: значение из Notion -> ключ
+KIND = {"Курс": "course", "Обучение": "course", "Ивент": "event", "Событие": "event",
+        "Мероприятие": "event", "Лекция": "event"}
+
+# Какие названия колонок искать (первое найденное). Регистр не важен.
+NAMES_KIND = ["формат", "kind", "format"]
+NAMES_DESC = ["описание", "description", "desc"]
+NAMES_CAT  = ["тип", "категория", "направление", "type", "category", "status"]
+NAMES_LINK = ["ссылка", "запись", "link", "url"]
 
 
 def api(url, method="GET", body=None):
@@ -25,47 +36,79 @@ def api(url, method="GET", body=None):
         raise
 
 
+def text_of(prop):
+    """Текст из свойства любого 'текстового' типа."""
+    t = prop.get("type")
+    if t in ("title", "rich_text"):
+        return "".join(x.get("plain_text", "") for x in prop[t])
+    if t in ("select", "status"):
+        return prop[t]["name"] if prop.get(t) else ""
+    if t == "multi_select":
+        return prop[t][0]["name"] if prop[t] else ""
+    if t == "url":
+        return prop["url"] or ""
+    return ""
+
+
+def find(props, names, types):
+    """Ищем колонку по имени (из списка) нужного типа."""
+    for name, prop in props.items():
+        if name.strip().lower() in names and prop.get("type") in types:
+            return prop
+    return None
+
+
 def parse_page(props):
-    title, date_val, cat = "", None, ""
+    title, start, end = "", None, None
     for prop in props.values():
-        t = prop.get("type")
-        if t == "title":
-            title = "".join(x["plain_text"] for x in prop["title"])
-        elif t == "date" and prop["date"] and date_val is None:
-            date_val = prop["date"]["start"]
-        elif t == "select" and prop["select"] and not cat:
-            cat = prop["select"]["name"]
-        elif t == "status" and prop.get("status") and not cat:
-            cat = prop["status"]["name"]
-    return title, date_val, cat
+        if prop.get("type") == "title":
+            title = text_of(prop)
+        elif prop.get("type") == "date" and prop["date"] and start is None:
+            start = prop["date"]["start"][:10]
+            end = (prop["date"].get("end") or "")[:10] or None
+
+    kind_p = find(props, NAMES_KIND, ("select", "status", "multi_select"))
+    cat_p  = find(props, NAMES_CAT,  ("select", "status", "multi_select"))
+    desc_p = find(props, NAMES_DESC, ("rich_text",))
+    link_p = find(props, NAMES_LINK, ("url", "rich_text"))
+
+    # запасной вариант: описание — первое текстовое поле, если колонки "Описание" нет
+    if desc_p is None:
+        desc_p = next((p for p in props.values() if p.get("type") == "rich_text"), None)
+
+    kind_val = text_of(kind_p) if kind_p else ""
+    cat_val  = text_of(cat_p) if cat_p else ""
+
+    return {
+        "d": start,
+        "e": end if end and end != start else None,
+        "t": title,
+        "c": CAT.get(cat_val, "coffee"),
+        "k": KIND.get(kind_val, "event"),
+        "desc": text_of(desc_p) if desc_p else "",
+        "url": text_of(link_p) if link_p else "",
+    }
 
 
 print(f"Использую ID базы: {DB}")
-
 db_info = api(f"https://api.notion.com/v1/databases/{DB}")
-print("Название базы:", "".join(t.get("plain_text", "") for t in db_info.get("title", [])) or "(без имени)")
-print("data sources:", [d["id"] for d in db_info["data_sources"]])
 ds_id = db_info["data_sources"][0]["id"]
 
-events, cursor, page_no, dumped = [], None, 0, False
+events, cursor, dumped = [], None, False
 while True:
     body = {"page_size": 100}
     if cursor:
         body["start_cursor"] = cursor
     res = api(f"https://api.notion.com/v1/data_sources/{ds_id}/query", "POST", body)
-    page_no += 1
-    print(f"Страница {page_no}: строк получено = {len(res['results'])}")
     if res["results"] and not dumped:
-        print("=== Колонки первой строки (имя: тип) ===")
+        print("Колонки базы (имя: тип):")
         for name, prop in res["results"][0]["properties"].items():
             print(f"   {name}: {prop.get('type')}")
-        print("========================================")
         dumped = True
     for pg in res["results"]:
-        title, date_val, cat = parse_page(pg["properties"])
-        if not date_val:
-            continue
-        events.append({"d": date_val[:10], "t": title, "c": CAT.get(cat, "coffee")})
+        ev = parse_page(pg["properties"])
+        if ev["d"]:
+            events.append(ev)
     if res.get("has_more"):
         cursor = res["next_cursor"]
     else:
