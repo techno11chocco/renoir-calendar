@@ -37,13 +37,13 @@ while True:
     if cursor:
         body["start_cursor"] = cursor
     res = api(f"https://api.notion.com/v1/data_sources/{ds_id}/query", "POST", body)
-    for pg in res["results"]:
+  for pg in res["results"]:
         p = pg["properties"]
-        d = p.get("Дата", {}).get("date")
+        d = p.get("Publishing Date", {}).get("date") or p.get("Date", {}).get("date")
         if not d:
             continue
-        title = "".join(t["plain_text"] for t in p.get("Название", {}).get("title", []))
-        sel = p.get("Тип", {}).get("select")
+        title = "".join(t["plain_text"] for t in p.get("Name", {}).get("title", []))
+        sel = p.get("Type", {}).get("select") or p.get("Status", {}).get("select")
         events.append({"d": d["start"][:10], "t": title,
                        "c": CAT.get(sel["name"] if sel else "", "coffee")})
     if res.get("has_more"):
