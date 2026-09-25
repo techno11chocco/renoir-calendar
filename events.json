@@ -1,62 +1,161 @@
 [
   {
-    "d": "2025-02-10",
+    "d": "2026-08-07",
     "e": null,
-    "t": "Blog post",
+    "t": "Sensory тренинг",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2025-02-19",
+    "d": "2026-08-11",
     "e": null,
-    "t": "Opinion piece",
+    "t": "Калибровка day",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2025-03-11",
+    "d": "2026-08-15",
     "e": null,
-    "t": "Product launch",
+    "t": "Бариста база",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2026-09-07",
+    "d": "2026-08-21",
     "e": null,
-    "t": "",
+    "t": "Sensory тренинг",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2026-09-07",
-    "e": null,
-    "t": "цгрв",
+    "d": "2026-08-26",
+    "e": "2026-08-31",
+    "t": "almaty",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2026-09-17",
+    "d": "2026-08-26",
     "e": null,
-    "t": "выступление",
+    "t": "Кофе дома]",
     "c": "coffee",
     "k": "event",
     "desc": "",
     "url": ""
   },
   {
-    "d": "2026-09-22",
+    "d": "2026-08-29",
+    "e": "2026-08-30",
+    "t": "QBC",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-03",
+    "e": "2026-09-05",
+    "t": "Coffee expo",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-10",
     "e": null,
-    "t": "тренинг",
+    "t": "Sensory training",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-12",
+    "e": null,
+    "t": "Казино в Культура Диктует",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-14",
+    "e": null,
+    "t": "Калибровка day",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-18",
+    "e": null,
+    "t": "Кофейное казино",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-09-24",
+    "e": null,
+    "t": "Sensory trainig",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-10-09",
+    "e": "2026-10-12",
+    "t": "QBC",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-10-15",
+    "e": null,
+    "t": "Sensory training",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-10-22",
+    "e": null,
+    "t": "лекция марлен",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-10-24",
+    "e": null,
+    "t": "Кофейное казино",
+    "c": "coffee",
+    "k": "event",
+    "desc": "",
+    "url": ""
+  },
+  {
+    "d": "2026-10-29",
+    "e": null,
+    "t": "Sensory training",
     "c": "coffee",
     "k": "event",
     "desc": "",
