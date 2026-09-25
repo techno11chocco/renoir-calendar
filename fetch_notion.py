@@ -24,15 +24,61 @@ NAMES_CAT  = ["тип", "категория", "направление", "type", 
 NAMES_LINK = ["ссылка", "запись", "link", "url"]
 
 
-def api(url, method="GET", body=None):
+def api(url, method="GET", body=None, quiet=False):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, headers=H, method=method)
     try:
         with urllib.request.urlopen(req) as r:
             return json.load(r)
     except urllib.error.HTTPError as e:
-        print(f"--- Notion ответил {e.code} на {method} {url}")
-        print(e.read().decode("utf-8"))
+        e.body = e.read().decode("utf-8")
+        if not quiet:
+            print(f"--- Notion ответил {e.code} на {method} {url}")
+            print(e.body)
+        raise
+
+
+def find_db_in_page(block_id, depth=0):
+    """Ищем базу внутри страницы (в т.ч. внутри колонок и переключателей)."""
+    cursor = None
+    while True:
+        url = f"https://api.notion.com/v1/blocks/{block_id}/children?page_size=100"
+        if cursor:
+            url += f"&start_cursor={cursor}"
+        res = api(url)
+        for b in res["results"]:
+            if b.get("type") == "child_database":
+                title = b["child_database"].get("title", "")
+                print(f"Нашёл базу на странице: «{title}» ({b['id']})")
+                return b["id"]
+        if depth < 3:
+            for b in res["results"]:
+                if b.get("has_children") and b.get("type") != "child_page":
+                    found = find_db_in_page(b["id"], depth + 1)
+                    if found:
+                        return found
+        if res.get("has_more"):
+            cursor = res["next_cursor"]
+        else:
+            return None
+
+
+def open_database(db_id):
+    """Открываем базу; если передали страницу — ищем базу внутри неё."""
+    try:
+        return api(f"https://api.notion.com/v1/databases/{db_id}", quiet=True)
+    except urllib.error.HTTPError as e:
+        if e.code == 400 and "is a page" in getattr(e, "body", ""):
+            print("По ссылке страница, а не база — ищу базу внутри страницы...")
+            inner = find_db_in_page(db_id)
+            if not inner:
+                raise SystemExit(
+                    "На странице не нашлось базы. Проверь: база должна быть "
+                    "настоящей (не «linked view» другой базы), а интеграция — "
+                    "подключена к странице через ••• → Connections.")
+            return api(f"https://api.notion.com/v1/databases/{inner}")
+        print(f"--- Notion ответил {e.code}")
+        print(getattr(e, "body", ""))
         raise
 
 
@@ -91,7 +137,7 @@ def parse_page(props):
 
 
 print(f"Использую ID базы: {DB}")
-db_info = api(f"https://api.notion.com/v1/databases/{DB}")
+db_info = open_database(DB)
 ds_id = db_info["data_sources"][0]["id"]
 
 events, cursor, dumped = [], None, False
