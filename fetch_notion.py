@@ -10,17 +10,19 @@ H = {"Authorization": f"Bearer {TOKEN}",
      "Notion-Version": "2026-03-11",
      "Content-Type": "application/json"}
 
-# Категория (цвет в календаре): значение из Notion -> ключ
-CAT = {"Сенсори": "sensory", "Кастинг": "kasting", "Обжарка": "roast", "Кофе": "coffee"}
+# ===== ТЕГИ → КАТЕГОРИЯ =====
+# В Notion заведи колонку «Теги» (Multi-select). Категорию скрипт определяет
+# по словам в тегах (регистр не важен, достаточно начала слова).
+# Порядок важен: сначала проверяется турнир, потом тренинг, потом ивент.
+RULES = [
+    ("comp",     ["турнир", "соревн", "чемпион", "судейств", "competition"]),
+    ("training", ["тренинг", "обучен", "курс", "урок", "класс", "training"]),
+    ("event",    ["ивент", "событ", "каппинг", "капинг", "казино", "дегустац",
+                  "мероприят", "лекци", "event", "cupping"]),
+]
+DEFAULT_CAT = "event"
 
-# Формат: значение из Notion -> ключ
-KIND = {"Курс": "course", "Обучение": "course", "Ивент": "event", "Событие": "event",
-        "Мероприятие": "event", "Лекция": "event"}
-
-# Какие названия колонок искать (первое найденное). Регистр не важен.
-NAMES_KIND = ["формат", "kind", "format"]
 NAMES_DESC = ["описание", "description", "desc"]
-NAMES_CAT  = ["тип", "категория", "направление", "type", "category", "status"]
 NAMES_LINK = ["ссылка", "запись", "link", "url"]
 
 
@@ -104,6 +106,26 @@ def find(props, names, types):
     return None
 
 
+def all_tags(props):
+    """Все значения из колонок типа select / multi_select."""
+    tags = []
+    for prop in props.values():
+        t = prop.get("type")
+        if t == "multi_select":
+            tags += [x["name"] for x in prop["multi_select"]]
+        elif t == "select" and prop["select"]:
+            tags.append(prop["select"]["name"])
+    return tags
+
+
+def category(tags):
+    low = [t.lower() for t in tags]
+    for cat, words in RULES:
+        if any(w in t for t in low for w in words):
+            return cat
+    return DEFAULT_CAT
+
+
 def parse_page(props):
     title, start, end = "", None, None
     for prop in props.values():
@@ -113,24 +135,18 @@ def parse_page(props):
             start = prop["date"]["start"][:10]
             end = (prop["date"].get("end") or "")[:10] or None
 
-    kind_p = find(props, NAMES_KIND, ("select", "status", "multi_select"))
-    cat_p  = find(props, NAMES_CAT,  ("select", "status", "multi_select"))
     desc_p = find(props, NAMES_DESC, ("rich_text",))
-    link_p = find(props, NAMES_LINK, ("url", "rich_text"))
-
-    # запасной вариант: описание — первое текстовое поле, если колонки "Описание" нет
     if desc_p is None:
         desc_p = next((p for p in props.values() if p.get("type") == "rich_text"), None)
+    link_p = find(props, NAMES_LINK, ("url", "rich_text"))
 
-    kind_val = text_of(kind_p) if kind_p else ""
-    cat_val  = text_of(cat_p) if cat_p else ""
-
+    tags = all_tags(props)
     return {
         "d": start,
         "e": end if end and end != start else None,
         "t": title,
-        "c": CAT.get(cat_val, "coffee"),
-        "k": KIND.get(kind_val, "event"),
+        "c": category(tags),
+        "tags": tags,
         "desc": text_of(desc_p) if desc_p else "",
         "url": text_of(link_p) if link_p else "",
     }
